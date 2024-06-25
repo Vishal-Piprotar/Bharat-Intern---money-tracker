@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 
 function App() {
   const [expenses, setExpenses] = useState([]);
   const [category, setCategory] = useState('');
-  const [amount, setAmount] = useState(0);
+  const [amount, setAmount] = useState('');
   const [date, setDate] = useState('');
   const [totalAmount, setTotalAmount] = useState(0);
 
@@ -14,12 +16,15 @@ function App() {
   }, []);
 
   const fetchExpenses = () => {
-    axios.get('https://bharat-intern-money-tracker.onrender.com/api/expenses')
+    axios.get('https://money-8cby.onrender.com/api/expenses')
       .then(res => {
         setExpenses(res.data);
         calculateTotalAmount(res.data);
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        console.log(err);
+        toast.error('Failed to fetch expenses');
+      });
   };
 
   const calculateTotalAmount = (expenses) => {
@@ -28,44 +33,51 @@ function App() {
   };
 
   const addExpense = () => {
-    const newExpense = { category, amount, date };
-    axios.post('https://bharat-intern-money-tracker.onrender.com/api/expenses', newExpense)
+    if (!category || !amount || !date) {
+      toast.error('Please fill all fields');
+      return;
+    }
+    const newExpense = { category, amount: parseFloat(amount), date };
+    axios.post('https://money-8cby.onrender.com/api/expenses', newExpense)
       .then(res => {
         setExpenses([...expenses, res.data]);
         calculateTotalAmount([...expenses, res.data]);
         resetForm();
+        toast.success('Expense added successfully');
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        console.log(err);
+        toast.error('Failed to add expense');
+      });
   };
 
   const deleteExpense = (id) => {
-    axios.delete(`https://bharat-intern-money-tracker.onrender.com/api/expenses/${id}`)
+    axios.delete(`https://money-8cby.onrender.com/api/expenses/${id}`)
       .then(() => {
         setExpenses(prevExpenses => {
           const updatedExpenses = prevExpenses.filter(expense => expense._id !== id);
           calculateTotalAmount(updatedExpenses);
           return updatedExpenses;
         });
+        toast.success('Expense deleted successfully');
       })
       .catch(error => {
         console.error('Error deleting expense:', error);
+        toast.error('Failed to delete expense');
       });
   };
-  
-  
 
   const resetForm = () => {
     setCategory('');
-    setAmount(0);
+    setAmount('');
     setDate('');
   };
 
   return (
-    <div>
+    <div className="container">
       <h1>Money Tracker Web App</h1>
       <div className="input-section">
-        <label htmlFor="category-select">Category:</label>
-        <select id="category-select" value={category} onChange={(e) => setCategory(e.target.value)}>
+        <select value={category} onChange={(e) => setCategory(e.target.value)}>
           <option value="">Select Category</option>
           <option value="College Fee">College Fee</option>
           <option value="Rent">Rent</option>
@@ -74,43 +86,42 @@ function App() {
           <option value="Shopping">Shopping</option>
           <option value="Cool Drinks">Cool Drinks</option>
         </select>
-        <label htmlFor="amount-input">Amount:</label>
-        <input type="number" id="amount-input" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} />
-        <label htmlFor="date-input">Date:</label>
-        <input type="date" id="date-input" value={date} onChange={(e) => setDate(e.target.value)} />
-        <button id="add-btn" onClick={addExpense}>Add</button>
+        <input type="number" placeholder="Amount" value={amount} onChange={(e) => setAmount(e.target.value)} />
+        <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+        <button onClick={addExpense}>Add</button>
       </div>
       <div className="expenses-list">
         <h2>Expenses List</h2>
-        <table>
-          <thead>
-            <tr>
-              <th>Category</th>
-              <th>Amount</th>
-              <th>Date</th>
-              <th>Delete</th>
-            </tr>
-          </thead>
-          <tbody id="expense-table-body">
-            {expenses.map(expense => (
-              <tr key={expense._id}>
-                <td>{expense.category}</td>
-                <td>{expense.amount}</td>
-                <td>{new Date(expense.date).toLocaleDateString()}</td>
-                <td><button onClick={() => deleteExpense(expense._id)}>Delete</button></td>
+        <div className="table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Amount</th>
+                <th>Date</th>
+                <th>Action</th>
               </tr>
-            ))}
-          </tbody>
-          <tfoot>
-            <tr>
-              <td>Total:</td>
-              <td id="total-amount">{totalAmount}</td>
-              <td></td>
-              <td></td>
-            </tr>
-          </tfoot>
-        </table>
+            </thead>
+            <tbody>
+              {expenses.map(expense => (
+                <tr key={expense._id}>
+                  <td>{expense.category}</td>
+                  <td>Rs. {expense.amount.toFixed(2)}</td>
+                  <td>{new Date(expense.date).toLocaleDateString()}</td>
+                  <td><button className="delete-btn" onClick={() => deleteExpense(expense._id)}>Delete</button></td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr>
+                <td colSpan="2">Total:</td>
+                <td colSpan="2">Rs. {totalAmount.toFixed(2)}</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
       </div>
+      <ToastContainer />
     </div>
   );
 }
