@@ -14,7 +14,7 @@ function App() {
   }, []);
 
   const fetchExpenses = () => {
-    axios.get('https://bharat-intern-money-tracker.onrender.com/api/expenses')
+    axios.get('https://money-8cby.onrender.com/api/expenses')
       .then(res => {
         setExpenses(res.data);
         calculateTotalAmount(res.data);
@@ -29,7 +29,7 @@ function App() {
 
   const addExpense = () => {
     const newExpense = { category, amount, date };
-    axios.post('https://bharat-intern-money-tracker.onrender.com/api/expenses', newExpense)
+    axios.post('https://money-8cby.onrender.com/api/expenses', newExpense)
       .then(res => {
         setExpenses([...expenses, res.data]);
         calculateTotalAmount([...expenses, res.data]);
@@ -39,7 +39,7 @@ function App() {
   };
 
   const deleteExpense = (id) => {
-    axios.delete(`https://bharat-intern-money-tracker.onrender.com/api/expenses/${id}`)
+    axios.delete(`https://money-8cby.onrender.com/api/expenses/${id}`)
       .then(() => {
         setExpenses(prevExpenses => {
           const updatedExpenses = prevExpenses.filter(expense => expense._id !== id);
