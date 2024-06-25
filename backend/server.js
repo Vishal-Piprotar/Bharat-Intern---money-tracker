@@ -11,11 +11,7 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // Database connection
-mongoose.connect('mongodb://localhost:27017/money-tracker', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useFindAndModify: false // To use findOneAndUpdate() instead of findAndModify()
-})
+mongoose.connect('mongodb://localhost:27017/money-tracker')
 .then(() => console.log('MongoDB connected'))
 .catch(err => console.error('MongoDB connection error:', err));
 
