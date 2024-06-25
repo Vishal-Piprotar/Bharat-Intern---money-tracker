@@ -33,15 +33,11 @@ function App() {
   };
 
   const addExpense = () => {
-<<<<<<< HEAD
     if (!category || !amount || !date) {
       toast.error('Please fill all fields');
       return;
     }
     const newExpense = { category, amount: parseFloat(amount), date };
-=======
-    const newExpense = { category, amount, date };
->>>>>>> d020f0c1f0358dd7b6baf2ceecd864ee852f770e
     axios.post('https://money-8cby.onrender.com/api/expenses', newExpense)
       .then(res => {
         setExpenses([...expenses, res.data]);
